@@ -7,6 +7,37 @@ from datetime import datetime
 from groq import Groq
 from playwright.sync_api import sync_playwright
 
+# Tell Playwright to save the browser in a folder next to our .exe 
+# instead of deep inside the user's hidden Windows AppData folder.
+os.environ["PLAYWRIGHT_BROWSERS_PATH"] = os.path.join(os.getcwd(), "pw-browsers")
+
+def ensure_browser_installed():
+    """Checks if the browser is downloaded, and if not, downloads it quietly."""
+    browsers_dir = os.environ["PLAYWRIGHT_BROWSERS_PATH"]
+    
+    # If the folder doesn't exist or is empty, we need to install
+    if not os.path.exists(browsers_dir) or len(os.listdir(browsers_dir)) == 0:
+        print("First run detected: Downloading the hidden browser engine...")
+        print("This might take a minute or two depending on your internet speed.\n")
+        
+        from playwright.__main__ import main as playwright_main
+        
+        # We temporarily fake the terminal commands so Playwright thinks 
+        # the user typed 'playwright install chromium'
+        original_argv = sys.argv
+        sys.argv = ['playwright', 'install', 'chromium']
+        
+        try:
+            playwright_main()
+        except SystemExit as e:
+            # We catch that "Exit" command so our script keeps running
+            pass 
+        finally:
+            # Restore the normal terminal arguments
+            sys.argv = original_argv
+            
+        print("\n✅ Browser engine installed successfully!\n")
+
 AUTH_FILE = "auth_state.json"
 PROFILE_DIR = os.path.join(os.getcwd(), "app_browser_profile") 
 
@@ -226,6 +257,8 @@ def run_sniper(api_key, form_url, target_time, user_data):
 
 if __name__ == "__main__":
     print("--- Microsoft Forms Sniper ---")
+
+    ensure_browser_installed()
 
     if not os.path.exists(AUTH_FILE):
         print("auth_state.json not found.")
