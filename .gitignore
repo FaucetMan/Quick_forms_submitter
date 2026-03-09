@@ -1,0 +1,12 @@
+.venv/
+__pycache__/
+*.py[cod]
+
+auth_state.json
+app_browser_profile/
+
+error_log.png
+verification_timeout.png
+
+.DS_Store
+Thumbs.db

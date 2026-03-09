@@ -1,2 +1,4 @@
 playwright==1.42.0
 groq==0.4.2
+
+# Run "playwright install" after installing this package to set up the necessary browser binaries
